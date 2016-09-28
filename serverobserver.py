@@ -7,6 +7,7 @@ import sys
 import re
 import json
 import time
+from achievement_poster import AchievementPoster
 
 file = "serverstatus.txt"
 
@@ -60,9 +61,10 @@ def Dump(playerlist):
 
 def Observe():
     list = PlayerList()
-    
+    poster = AchievementPoster()
     while(True):
         line = sys.stdin.readline()
+        print line
         match = re.search(': (.+) joined the game', line)
         if match:
             list.Login(match.group(1))
@@ -73,8 +75,11 @@ def Observe():
             list.Logout(match.group(1))
             Dump(list)
 
+        match = re.search(': (.+) has just earned the achievement \[(.+)\]', line)
+        if match:
+            poster.Post(match.group(1), match.group(2))
+            
 if __name__ == "__main__":
-    global file
     if len(sys.argv) > 1:
         if sys.argv[1] == '-h':
             print "Usage: " + sys.argv[0] + " [DUMPFILE_NAME]"

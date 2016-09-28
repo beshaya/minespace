@@ -10,14 +10,25 @@
     <div class="container">
       <h1>minespace</h1>
       <br>
-      <div id="content">
+      <div id="players">
 	{% if players %}
 	Current players: {{ players }}
 	{% else %}
-	No Player list found
 	{% endif %}
 	{% if post %}
 	{{ post }}
+	{% endif %}
+      </div>
+      <div id="achievements">
+	Recent Achievements:
+	{% if achievements %}
+	<ul>
+	{% for item in achievements %}
+	<li>
+	  {{ item.author }} earned the achievement [{{ item.achievement_name }}] at {{ item.date }}
+	</li>
+	{% endfor %}
+	</ul>
 	{% endif %}
       </div>
     </div>

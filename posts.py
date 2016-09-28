@@ -27,7 +27,24 @@ class Post(db.Model):
 
     def __repr__(self):
         return "<Post(author=%s content=%s)>" % (self.author, self.content)
-        
+
+class Achievement(db.Model):
+    __tablename__ = 'achievements'
+    id = db.Column(db.Integer, primary_key=True)
+    author = db.Column(db.String(32))
+    date = db.Column(db.DateTime)
+    achievement_name = db.Column(db.Text)
+
+    def __init__(self, author, achievement_name, date=None):
+        self.author = author
+        self.achievement_name = achievement_name
+        if date is None:
+            date = datetime.utcnow()
+        self.date = date
+
+    def __repr__(self):
+        return "<achievement player=%s name=%s)>" % (self.author, self.achievement_name)
+
 if __name__ == '__main__':
     app = Flask(__name__)
     app.config.from_pyfile('config.py')
