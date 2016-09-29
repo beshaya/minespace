@@ -64,7 +64,7 @@ def Observe():
     poster = AchievementPoster()
     while(True):
         line = sys.stdin.readline()
-        print line
+        print ">" + line,
         match = re.search(': (.+) joined the game', line)
         if match:
             list.Login(match.group(1))
