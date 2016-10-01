@@ -6,15 +6,17 @@ if [[ `cat version.txt` == "$installer_version" ]]; then
     echo "Latest version already installed."
 fi
 
-apt-get update
-apt-get install -yf python3-dev git pip
+echo "Installing packages"
+apt-get update > /dev/null
+apt-get install -yf python3-dev git python-pip virtualenv supervisor > /dev/null
 
-git clone https://github.com/beshaya/minespace && \
-cd minespace && \
-git pull && \
-pip install -r requirements.txt && \
-gsutil cp gs://tnfc-minespace/config.py ./ &&\
-cd ../ &&\
-echo "$installer_version" > version.txt && \
-echo "Installation complete."    
+git clone https://github.com/beshaya/minespace /opt/app/ && \
+    cd /opt/app && git pull && \ 
+    virtualenv /opt/app/venv -p /usr/bin/python3 &&\
+    echo "Installing python modules" && \
+    /opt/app/venv/bin/pip install -r /opt/app/requirements.txt > /dev/null&& \
+    gsutil cp gs://tnfc-minespace/config.py ./ &&\
+    cd / &&\
+    echo "$installer_version" > version.txt && \
+    echo "Installation complete."    
 
