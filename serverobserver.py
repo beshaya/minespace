@@ -7,9 +7,11 @@ import sys
 import re
 import json
 import time
-from achievement_poster import AchievementPoster
+import model_firebase as model
+import config
 
 file = "serverstatus.txt"
+model.init_standalone(config)
 
 class Player:
     def __init__(self, name, online=True):
@@ -61,10 +63,9 @@ def Dump(playerlist):
 
 def Observe():
     list = PlayerList()
-    poster = AchievementPoster()
     while(True):
         line = sys.stdin.readline()
-        print ">" + line,
+        print(">" + line, end="")
         match = re.search(': (.+) joined the game', line)
         if match:
             list.Login(match.group(1))
@@ -77,12 +78,13 @@ def Observe():
 
         match = re.search(': (.+) has just earned the achievement \[(.+)\]', line)
         if match:
-            poster.Post(match.group(1), match.group(2))
+            achievement = model.Achievement(match.group(1), match.group(2))
+            model.Push(achievement)
             
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         if sys.argv[1] == '-h':
-            print "Usage: " + sys.argv[0] + " [DUMPFILE_NAME]"
+            print("Usage: " + sys.argv[0] + " [DUMPFILE_NAME]")
             exit()
         else:
             file = sys.argv[1]
