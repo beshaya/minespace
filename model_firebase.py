@@ -29,7 +29,7 @@ class Model:
     @classmethod
     def GetAll(cls):
         global db, user
-        response = db.child(cls.__tablename__).get(user['idToken'])
+        response = db.child(cls.__tablename__).order_by_child('date').get(user['idToken'])
         return [cls.FromDict(x.item[1]) for x in response.pyres]
 
     @classmethod
@@ -56,7 +56,7 @@ class Achievement(Model):
         self.player = player
         self.achievement = achievement
         if date is None:
-            date = (datetime.utcnow() - datetime(1970, 1, 1)).total_seconds()
+            date = datetime.utcnow().isoformat()
         self.date = date
 
     def __repr__(self):
@@ -70,13 +70,15 @@ class Post(Model):
         self.authorId = authorId
         self.content = content
         if date is None:
-            date = datetime.utcnow()
+            date = datetime.utcnow().isoformat()
         self.date = date
 
     def __repr__(self):
         return "<Post player=%s content=%s>" % (self.user, self.achievement, self.date)
 
 if __name__ == "__main__":
+    import config
+    init_standalone(config)
     ach = Achievement("nineof36", "starting a fire")
     #Push(ach)
     print(Achievement.GetAll())

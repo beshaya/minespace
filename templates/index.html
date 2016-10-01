@@ -5,6 +5,7 @@
     <title>minespace</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- styles -->
+  <script src="/static/js/moment.min.js"></script>
   </head>
   <body>
     <div class="container">
@@ -25,7 +26,10 @@
 	<ul>
 	{% for item in achievements %}
 	<li>
-	  {{ item.player }} earned the achievement [{{ item.achievement }}] at {{ item.date }}
+	  {{ item.player }} earned the achievement [{{ item.achievement }}] on
+	  <script>
+	    document.write(moment.utc("{{ item.date }}").local().format('LLLL'));
+	  </script>
 	</li>
 	{% endfor %}
 	</ul>

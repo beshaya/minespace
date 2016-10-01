@@ -1,7 +1,7 @@
 cat > /etc/supervisor/conf.d/python-app.conf <<EOF
 [program:pythonapp]
 directory=/opt/app/
-command=/opt/app/venv/bin/gunicorn main:app --bind 80
+command=/opt/app/venv/bin/gunicorn main:app --bind :80
 autostart=true
 autorestart=true
 user=root
@@ -15,3 +15,4 @@ EOF
 
 supervisorctl reread
 supervisorctl update
+#supervisorctl restart pythonapp
