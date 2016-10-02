@@ -1,0 +1,15 @@
+body {background-image:url(/static/img/marble_brick.png)}
+.container {
+    background-color: #FFFFFF;
+    width: 80vw;
+    margin: auto;
+    padding: 1em;
+    padding-top: 24px;
+    border-radius: 24px;
+}
+
+.container > .minifeed {
+}
+
+li {background: #39CCC;}
+li:nth-child(odd) {background: #7FDBFF;}
