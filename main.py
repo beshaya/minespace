@@ -13,6 +13,7 @@ model.init_app(app)
 @app.route("/")
 def index():
     a = model.Achievement.GetAll()
+    a.reverse()
     p = None
     return render_template('index.html', posts=p, achievements=a)
 

@@ -6,22 +6,29 @@ import pyrebase
 firebase = None
 db = None
 user = None
+email = None
+pwd = None
 
 def init_app(app):
-    global firebase, db, user
+    global firebase, db, user, email, pwd
 
     firebase = pyrebase.initialize_app(app.config['FIREBASE_CONFIG'])
     db = firebase.database()
-    auth = firebase.auth()
-    user = auth.sign_in_with_email_and_password("minecraft@fullerstack.me", "icanhazachievement")
-
+    email = app.config['FIREBASE_EMAIL']
+    pwd = app.config['FIREBASE_PWD']
+    
 def init_standalone(config):
-    global firebase, db, user
+    global firebase, db, user, email, pwd
 
     firebase = pyrebase.initialize_app(config.FIREBASE_CONFIG)
     db = firebase.database()
-    auth = firebase.auth()
-    user = auth.sign_in_with_email_and_password("minecraft@fullerstack.me", "icanhazachievement")    
+    email = config.FIREBASE_EMAIL
+    pwd = config.FIREBASE_PWD
+
+#@TODO(bshaya): Figure out when we can use refresh tokens.
+def ReauthenticateIfNecessary():
+    global firebase, user, email, pwd
+    user = firebase.auth().sign_in_with_email_and_password(email, pwd)
     
 class Model:
     __tablename__ = '/'
@@ -29,6 +36,7 @@ class Model:
     @classmethod
     def GetAll(cls):
         global db, user
+        ReauthenticateIfNecessary()
         response = db.child(cls.__tablename__).order_by_child('date').get(user['idToken'])
         return [cls.FromDict(x.item[1]) for x in response.pyres]
 
@@ -48,6 +56,7 @@ class Model:
 # Write item to firebase
 def Push(item):
     global db, user
+    ReauthenticateIfNecessary()
     db.child(item.__tablename__).push(item.ToJson(), user['idToken'])
     
 class Achievement(Model):
