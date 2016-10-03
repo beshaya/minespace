@@ -14,10 +14,34 @@
       <h1>Minespace</h1>
       <br>
       <div id="players">
-	{% if players %}
-	Current players: {{ players }}
+	{% if online_players %}
+	Current players: <p />
+	<ul>
+	  {% for player in online_players %}
+	  <li>
+	    {{ player.player }}
+	  </li>
+	  {% endfor %}
+	</ul>
+	
 	{% else %}
+	No players online
 	{% endif %}
+
+	{% if offline_players %}
+	Offline Players:
+	<ul>
+	  {% for player in offline_players %}
+	  <li>
+	    {{ player.player }} last seen at
+	    <script>
+	      document.write(moment.utc("{{ player.last_seen }}").local().format('LLLL'));
+	    </script>
+	  </li>
+	  {% endfor %}
+	</ul>
+	{% endif %}
+
 	{% if post %}
 	{{ post }}
 	{% endif %}

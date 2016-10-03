@@ -14,8 +14,12 @@ model.init_app(app)
 def index():
     a = model.Achievement.GetAll()
     a.reverse()
-    p = None
-    return render_template('index.html', posts=p, achievements=a)
+    players = model.Player.GetAll()
+    online_players = [x for x in players if x.is_online]
+    offline_players = [x for x in players if not x.is_online]
+    offline_players.reverse()
+    return render_template('index.html', online_players=online_players,
+                           offline_players=offline_players, achievements=a)
 
 @app.route('/static/<path:path>')
 def send_static(path):

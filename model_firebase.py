@@ -29,16 +29,22 @@ def init_standalone(config):
 def ReauthenticateIfNecessary():
     global firebase, user, email, pwd
     user = firebase.auth().sign_in_with_email_and_password(email, pwd)
-    
+
+# Write item to firebase
+def Push(item):
+    global db, user
+    ReauthenticateIfNecessary()
+    db.child(item.__tablename__).push(item.ToJson(), user['idToken'])
+
 class Model:
     __tablename__ = '/'
-       
+    __sortby__ = 'date'
     @classmethod
     def GetAll(cls):
         global db, user
         ReauthenticateIfNecessary()
-        response = db.child(cls.__tablename__).order_by_child('date').get(user['idToken'])
-        return [cls.FromDict(x.item[1]) for x in response.pyres]
+        response = db.child(cls.__tablename__).order_by_child(cls.__sortby__).get(user['idToken'])
+        return [cls.FromDict(x.val()) for x in response.each()]
 
     @classmethod
     def FromDict(cls, dct):
@@ -52,13 +58,7 @@ class Model:
         dct = self.__dict__
         #return json.dumps(dct)
         return dct
-
-# Write item to firebase
-def Push(item):
-    global db, user
-    ReauthenticateIfNecessary()
-    db.child(item.__tablename__).push(item.ToJson(), user['idToken'])
-    
+   
 class Achievement(Model):
     __tablename__ = '/achievements'
     def __init__(self, player, achievement, date=None):
@@ -83,8 +83,27 @@ class Post(Model):
         self.date = date
 
     def __repr__(self):
-        return "<Post player=%s content=%s>" % (self.user, self.achievement, self.date)
+        return "<Post player={} content={}>".format(self.user, self.achievement, self.date)
 
+class Player(Model):
+    __tablename__ = '/players'
+    __sortby__ = 'last_seen'
+    def __init__(self, player, is_online, last_seen=None):
+        self.player = player
+        self.is_online = is_online
+        if last_seen is None:
+            last_seen = datetime.utcnow().isoformat()
+
+        self.last_seen = last_seen
+
+    def __repr__(self):
+        return "<Player name={} online={} last_seen={}>".format(self.player, self.is_online, self.last_seen)
+
+    def Set(self):
+        global db, user
+        ReauthenticateIfNecessary()
+        db.child(self.__tablename__).child(self.player).set(self.ToJson(), user['idToken'])
+       
 if __name__ == "__main__":
     import config
     init_standalone(config)
