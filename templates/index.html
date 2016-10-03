@@ -13,7 +13,7 @@
     <div class="container">
       <h1>Minespace</h1>
       <br>
-      <div id="players">
+      <div id="players"><div id="online_players">
 	{% if online_players %}
 	Current players: <p />
 	<ul>
@@ -25,10 +25,12 @@
 	</ul>
 	
 	{% else %}
-	No players online
+	No players online.
 	{% endif %}
+	</div>
 
 	{% if offline_players %}
+	<div id="offline_players">
 	Offline Players:
 	<ul>
 	  {% for player in offline_players %}
@@ -41,6 +43,7 @@
 	  {% endfor %}
 	</ul>
 	{% endif %}
+	</div>
 
 	{% if post %}
 	{{ post }}
