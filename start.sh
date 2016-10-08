@@ -13,6 +13,8 @@ stdout_logfile=syslog
 stderr_logfile=syslog
 EOF
 
+supervisorctl stop pythonapp
 supervisorctl reread
 supervisorctl update
+supervisorctl start pythonapp
 #supervisorctl restart pythonapp
