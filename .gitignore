@@ -1,5 +1,5 @@
 config.py
 venv/
 scratch*
-__pycatch__
+__pycache__
 *~

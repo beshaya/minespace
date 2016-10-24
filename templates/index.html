@@ -1,12 +1,44 @@
 {% extends "base.html" %}
 
+{% block scripts %}
+<script>
+  // Initial arrays of data
+  var posts = {
+    {% for item in posts -%}
+    "{{ item.key }}": {{ item.ToJson()|tojson }},
+    {% endfor -%} };
+  var achievements = {
+    {% for item in achievements -%}
+    "{{ item.key }}": {{ item.ToJson()|tojson }},
+    {% endfor -%} };
+  function postData() {
+    var content = document.getElementById('post_content').value
+    database.post(content, function() {
+      document.getElementById('post_content').value = '';
+    })
+  }
+  database.on('post', function(data) {
+    // This could be a new post, or a post we initially had.
+    if (data.key in posts) return;
+    posts[data.key] = data.val();
+    var li = document.createElement('li');
+    var formatted_date = moment.utc(data.val().date).local().format('LLLL')
+    li.appendChild(document.createTextNode(data.val().player + ': ' +
+					   data.val().content));
+    li.appendChild(document.createElement('br'));
+    li.appendChild(document.createTextNode('posted on ' + formatted_date));
+    var ul = document.getElementById('posts_ul');
+    ul.insertBefore(li, ul.firstChild);
+  });
+</script>
+{% endblock %}
 {% block contents %}
 <br>
 <div id="players">
-  <div id="online_players">
+  <div id="online_players_div">
     {% if online_players %}
     Current players: <p />
-    <ul>
+    <ul id="online_players_ul">
       {% for player in online_players %}
       <li>
 	{{ player.player }}
@@ -20,9 +52,9 @@
   </div>
   
   {% if offline_players %}
-  <div id="offline_players">
+  <div id="offline_players_div">
     Offline Players:
-    <ul>
+    <ul id="offline_players_ul">
       {% for player in offline_players %}
       <li>
 	{{ player.player }} last seen at
@@ -39,10 +71,10 @@
   {{ post }}
   {% endif %}
 </div>
-<div id="achievements" class="minifeed">
+<div id="achievements_div" class="minifeed">
   Recent Achievements:
   {% if achievements %}
-  <ul>
+  <ul id="achievements_ul">
     {% for item in achievements %}
     <li>
       {{ item.player }} earned the achievement [{{ item.achievement }}] on
@@ -53,5 +85,33 @@
     {% endfor %}
   </ul>
   {% endif %}
+</div>
+<div id="posts_div">
+  What are you up to?<p />
+  <div class="parentwidth">
+    <div class="right">
+      <button onClick="postData()">
+	Post!
+      </button>
+    </div>
+    <div class="left">
+      <input type="text" id="post_content"/>
+    </div>
+  </div>
+  <div id="posts_content_div" class="minifeed">
+  <ul id="posts_ul">
+    {% if posts %}
+    {% for item in posts %}
+    <li>
+      {{ item.player }}: {{ item.content }} <br />
+      posted on 
+      <script>
+  	document.write(moment.utc("{{ item.date }}").local().format('LLLL'));
+      </script>
+    </li>
+    {% endfor %}
+  {% endif %}
+  </ul>
+  </div>
 </div>
 {% endblock %}

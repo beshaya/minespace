@@ -1,27 +1,28 @@
 {% extends "base.html" %}
 
 {% block scripts %}
-  <script>
-  function OnFirstLogin(user) {
+<script>
+  database.on('first_login', function OnFirstLogin(user) {
     var bar = document.getElementById("header");
     bar.innerHTML = "Welcome, " + user.displayName +
       ' <a onclick="logout()">Log Out</a>';
-  }
-  function OnLogin(user) {
-    window.location = "/";
-  }
-  function OnLogout() {
-    window.location = "/";
-  }
-  setLoginPath(OnFirstLogin, OnLogin, OnLogout);
-  </script>
+  });
+  database.on('login', function OnLogin(user) {
+    console.log('login from first_time');
+    setTimeout(function(){window.location = "/"}, 2000);
+  });
+  database.on('logout', function OnLogout() {
+    console.log('logout from first_time');
+    setTimeout(function(){window.location = "/"}, 2000);
+  });
+</script>
 {% endblock %}
 {% block title %}Welcome to Minespace!{% endblock %}
 {% block contents %}
       Please enter your in-game name.<p />
       Player name:
       <input type="text" name="player" id="player"><p />
-      <button onClick="setPlayerName(document.getElementById('player').value)">
+      <button onClick="database.setPlayerName(document.getElementById('player').value)">
 	Submit
       </button>
 {% endblock %}

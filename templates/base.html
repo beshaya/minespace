@@ -9,23 +9,26 @@
     <script src="https://www.gstatic.com/firebasejs/3.5.1/firebase.js"></script>
     <script src="/static/js/firebase.js"></script>
     <script>
-      function OnFirstLogin(user) {
-	window.location = "/initial"
-      }
-      function OnLogin(user) {
+      database = new Minebook();
+      database.on('first_login', function OnFirstLogin(user) {
+	window.location = "/initial";
+      });
+      database.on('login', function OnLogin(user) {
 	var bar = document.getElementById("header");
 	bar.innerHTML = "Welcome, " + user.displayName +
-	  ' <a onclick="logout()">Log Out</a>';
-      }
-      function OnLogout() {
+	  ' <a onclick="database.logout()">Log Out</a>';
+      });
+      database.on('logout', function OnLogout() {
       var bar = document.getElementById("header");
-	  bar.innerHTML = '<a onclick="login()">Login</a>'
-      }
-      setLoginPath(OnFirstLogin, OnLogin, OnLogout);
+	  bar.innerHTML = '<a onclick="database.login()">Login</a>'
+      });
     </script>
-    {% block scripts %}
-    {% endblock %}
-    <link rel="stylesheet" type="text/css" href="/static/style.css"/>
+      {% block scripts %}
+      {% endblock %}
+    <script>
+      database.startListeners();
+    </script>
+  <link rel="stylesheet" type="text/css" href="/static/style.css"/>
   </head>
   <body>
     <div class="header" id="header">

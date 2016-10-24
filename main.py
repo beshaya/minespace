@@ -8,6 +8,7 @@ import config
 
 app = Flask(__name__)
 app.config.from_object(config)
+
 model.init_app(app)
 
 @app.route("/")
@@ -15,11 +16,14 @@ def index():
     a = model.Achievement.GetAll()
     a.reverse()
     players = model.Player.GetAll()
+    posts = model.Post.GetAll()
+    print(posts)
     online_players = [x for x in players if x.is_online]
     offline_players = [x for x in players if not x.is_online]
     offline_players.reverse()
     return render_template('index.html', online_players=online_players,
-                           offline_players=offline_players, achievements=a)
+                           offline_players=offline_players, achievements=a,
+                           posts=posts)
 
 @app.route("/initial")
 def initial():

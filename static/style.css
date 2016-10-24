@@ -1,4 +1,7 @@
-body {background-image:url(/static/img/marble_brick.png)}
+body {
+    background-image:url(/static/img/marble_brick.png);
+    margin: 0;
+}
 .container {
     background-color: #FFFFFF;
     width: 80vw;
@@ -11,5 +14,32 @@ body {background-image:url(/static/img/marble_brick.png)}
 .container > .minifeed {
 }
 
+ul {list-style: none;}
 li {background: #39CCC;}
 li:nth-child(odd) {background: #7FDBFF;}
+
+.header {
+    background-color: #FFFFFF;
+    width: 99vw;
+    padding-right: 1vw;
+    text-align: right;
+    margin-bottom: 24px;
+}
+
+.parentwidth {
+    width: 100%;
+}
+
+.left {
+    width: auto;
+    overflow: hidden;
+}
+
+.right {
+    width: fit-content;
+    float: right;
+}
+
+ input {
+    width: 100%;
+}

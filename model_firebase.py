@@ -43,22 +43,32 @@ class Model:
     def GetAll(cls):
         global db, user
         ReauthenticateIfNecessary()
-        response = db.child(cls.__tablename__).order_by_child(cls.__sortby__).get(user['idToken'])
-        return [cls.FromDict(x.val()) for x in response.each()]
+        response = db.child(cls.__tablename__).get(user['idToken'])
+        if not response.each():
+            return []
+
+        return [cls.FromDict(x.val(), x.key()) for x in response.each()]
 
     @classmethod
-    def FromDict(cls, dct):
+    def FromDict(cls, dct, ref_key):
         instance = cls.__new__(cls)
         for key in dct:
             setattr(instance, key, dct[key])
+
+        if (ref_key):
+            setattr(instance, 'key', ref_key)
 
         return instance
             
     def ToJson(self):
         dct = self.__dict__
-        #return json.dumps(dct)
         return dct
-   
+
+    def __repr__(self):
+        dct = self.ToJson()
+        dct['type'] = type(self).__name__
+        return json.dumps(dct)
+        
 class Achievement(Model):
     __tablename__ = '/achievements'
     def __init__(self, player, achievement, date=None):
@@ -68,22 +78,15 @@ class Achievement(Model):
             date = datetime.utcnow().isoformat()
         self.date = date
 
-    def __repr__(self):
-        return "<Achievement player=%s name=%s date=%s>" % (self.player, self.achievement,
-                                                            self.date)
-    
 class Post(Model):
     __tablename__ = '/posts'
     def __init__(self, player, content, imageUrl="", date=None):
-        self.author = author
-        self.authorId = authorId
+        self.player = author
+        self.userId = authorId
         self.content = content
         if date is None:
             date = datetime.utcnow().isoformat()
         self.date = date
-
-    def __repr__(self):
-        return "<Post player={} content={}>".format(self.user, self.achievement, self.date)
 
 class Player(Model):
     __tablename__ = '/players'
@@ -95,9 +98,6 @@ class Player(Model):
             last_seen = datetime.utcnow().isoformat()
 
         self.last_seen = last_seen
-
-    def __repr__(self):
-        return "<Player name={} online={} last_seen={}>".format(self.player, self.is_online, self.last_seen)
 
     def Set(self):
         global db, user

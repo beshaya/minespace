@@ -7,58 +7,86 @@ var config = {
     messagingSenderId: "1087681682464"
 };
 
-firebase.initializeApp(config);
-var provider = new firebase.auth.GoogleAuthProvider();
-var OnLogin_ = function () {};
-var OnLogout_ = function () {};
-var OnFirstLogin_ = function () {};
+function Minebook () {
+  firebase.initializeApp(config);
+  this.provider_ = new firebase.auth.GoogleAuthProvider();
+  this.callbacks_ = {}
+  this.user_ = null;
 
-function login(callback) {
-    firebase.auth().signInWithPopup(provider).then(function(result) {
-        // This gives you a Google Access Token.
-        var token = result.credential.accessToken;
-        // The signed-in user info.
-	var user = result.user;
-	if (callback) callback(user);
-    }).catch(function(error) {
-	console.log("Error logging in: " + error.errorMessage);
-    });
-}
-
-function logout() {
-    firebase.auth().signOut();
-}
-
-function setPlayerName(player) {
-  var user = firebase.auth().currentUser;
-  user.updateProfile({displayName: player}).catch(function(error) {
-    console.log('Error setting displayName: ' + error);
-  });
-  firebase.database().ref('users/' + user.uid).set({player_name: player})
-    .then(function() {
-      OnLogin_();
-    }).catch(function(error) {
-      console.log('Error setting users/uid/player: ' + error);
-    });
-}
-
-function setLoginPath(OnFirstLogin, OnLogin, OnLogout) {
-  if (OnFirstLogin) OnFirstLogin_ = OnFirstLogin;
-  if (OnLogin) OnLogin_ = OnLogin;
-  if (OnLogout) OnLogout_ = OnLogout;
-}
-
-// Determine the auth state of the user.
-firebase.auth().onAuthStateChanged(function(user) {
-  if (user) {
-    firebase.database().ref('/users/' + user.uid).once('value').then(function(snapshot) {
-      if (snapshot.val().player_name) return OnLogin_(user);
-      OnFirstLogin_(user);
-    }).catch(function(error) {
-      console.log(error.message);
-      OnFirstLogin_(user);
-    });    
-  } else {
-    OnLogout_(user);
+  this.on = function(event, callback) {
+    this.callbacks_[event] = callback;
   }
-});
+
+  this.performCallback = function (event) {
+    var extra = [].slice.call(arguments, 1);
+    if (this.callbacks_[event]) {
+      this.callbacks_[event].apply(this, extra);
+    }
+  }
+
+  this.login = function(callback) {
+    firebase.auth().signInWithPopup(this.provider_).then(function(result) {
+      // This gives you a Google Access Token.
+      var token = result.credential.accessToken;
+      // The signed-in user info.
+      var user = result.user;
+      if (callback) callback(user);
+    }).catch(function(error) {
+      console.log("Error logging in: " + error.errorMessage);
+    });
+  }
+
+  this.logout = function() {
+    firebase.auth().signOut();
+  }
+
+  this.setPlayerName = function(player) {
+    var user = firebase.auth().currentUser;
+    user.updateProfile({displayName: player}).catch(function(error) {
+      console.log('Error setting displayName: ' + error);
+    });
+    firebase.database().ref('users/' + user.uid).set({player_name: player})
+      .then(function() {
+	this.performCallback('login');
+      }).catch(function(error) {
+	console.log('Error setting users/uid/player: ' + error);
+      });
+  }
+
+  this.post = function(content, callback) {
+    if (!this.user_) return console.log("Error: not logged in!");
+    firebase.database().ref('posts/').push({
+      userId: this.user_.uid,
+      player: this.user_.displayName,
+      content: content,
+      date: (new Date).toISOString()
+    }).then(function (result) {
+      if (callback) return callback(result);
+    }).catch(function (error) {
+      console.log("Error posting: " + error);
+    });
+  }
+
+  this.startListeners = function() {
+    var self = this;
+    // Determine the auth state of the user.
+    firebase.auth().onAuthStateChanged(function(user) {
+      self.user_ = user;
+      if (user) {
+	firebase.database().ref('/users/' + user.uid).once('value').then(function(snapshot) {
+	  if (snapshot.val().player_name) return self.performCallback('login', self.user_);
+	  return self.performCallback('first_login', self.user_);
+}).catch(function(error) {
+	  console.log(error.message);
+	  //return self.performCallback('first_login',user);
+	});    
+      } else {
+	return self.performCallback('logout');
+      }
+    });
+    
+    firebase.database().ref('posts/').on('child_added', function(data) {
+      self.performCallback('post', data)
+    });
+  }
+};
