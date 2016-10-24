@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block scripts %}
+  <script>
+  function OnFirstLogin(user) {
+    var bar = document.getElementById("header");
+    bar.innerHTML = "Welcome, " + user.displayName +
+      ' <a onclick="logout()">Log Out</a>';
+  }
+  function OnLogin(user) {
+    window.location = "/";
+  }
+  function OnLogout() {
+    window.location = "/";
+  }
+  setLoginPath(OnFirstLogin, OnLogin, OnLogout);
+  </script>
+{% endblock %}
+{% block title %}Welcome to Minespace!{% endblock %}
+{% block contents %}
+      Please enter your in-game name.<p />
+      Player name:
+      <input type="text" name="player" id="player"><p />
+      <button onClick="setPlayerName(document.getElementById('player').value)">
+	Submit
+      </button>
+{% endblock %}

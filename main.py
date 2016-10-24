@@ -21,6 +21,10 @@ def index():
     return render_template('index.html', online_players=online_players,
                            offline_players=offline_players, achievements=a)
 
+@app.route("/initial")
+def initial():
+    return render_template('first_time.html')
+
 @app.route('/static/<path:path>')
 def send_static(path):
     return send_from_directory('static', path)

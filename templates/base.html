@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head lang="en">
+    <meta charset="UTF-8">
+    <title>minespace</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- styles -->
+    <script src="/static/js/moment.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/3.5.1/firebase.js"></script>
+    <script src="/static/js/firebase.js"></script>
+    <script>
+      function OnFirstLogin(user) {
+	window.location = "/initial"
+      }
+      function OnLogin(user) {
+	var bar = document.getElementById("header");
+	bar.innerHTML = "Welcome, " + user.displayName +
+	  ' <a onclick="logout()">Log Out</a>';
+      }
+      function OnLogout() {
+      var bar = document.getElementById("header");
+	  bar.innerHTML = '<a onclick="login()">Login</a>'
+      }
+      setLoginPath(OnFirstLogin, OnLogin, OnLogout);
+    </script>
+    {% block scripts %}
+    {% endblock %}
+    <link rel="stylesheet" type="text/css" href="/static/style.css"/>
+  </head>
+  <body>
+    <div class="header" id="header">
+      <a onclick="login()">Login</a>
+    </div>
+    <div class="container">
+      <h1>{% block title %}Minespace{% endblock %}</h1>
+      {% block contents %}
+      {% endblock %}
+    </div>
+  </body>
+</html>

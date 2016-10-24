@@ -1,70 +1,57 @@
-<!DOCTYPE html>
-<html>
-  <head lang="en">
-    <meta charset="UTF-8">
-    <title>minespace</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- styles -->
-    <script src="/static/js/moment.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="/static/style.css"/>
-  </head>
-  <body>
+{% extends "base.html" %}
+
+{% block contents %}
+<br>
+<div id="players">
+  <div id="online_players">
+    {% if online_players %}
+    Current players: <p />
+    <ul>
+      {% for player in online_players %}
+      <li>
+	{{ player.player }}
+      </li>
+      {% endfor %}
+    </ul>
     
-    <div class="container">
-      <h1>Minespace</h1>
-      <br>
-      <div id="players">
-	<div id="online_players">
-	{% if online_players %}
-	Current players: <p />
-	<ul>
-	  {% for player in online_players %}
-	  <li>
-	    {{ player.player }}
-	  </li>
-	  {% endfor %}
-	</ul>
-	
-	{% else %}
-	No players online.
-	{% endif %}
-	</div>
-
-	{% if offline_players %}
-	<div id="offline_players">
-	Offline Players:
-	<ul>
-	  {% for player in offline_players %}
-	  <li>
-	    {{ player.player }} last seen at
-	    <script>
-	      document.write(moment.utc("{{ player.last_seen }}").local().format('LLLL'));
-	    </script>
-	  </li>
-	  {% endfor %}
-	</ul>
-	</div>
-	{% endif %}
-
-	{% if post %}
-	{{ post }}
-	{% endif %}
-      </div>
-      <div id="achievements" class="minifeed">
-	Recent Achievements:
-	{% if achievements %}
-	<ul>
-	{% for item in achievements %}
-	<li>
-	  {{ item.player }} earned the achievement [{{ item.achievement }}] on
-	  <script>
-	    document.write(moment.utc("{{ item.date }}").local().format('LLLL'));
-	  </script>
-	</li>
-	{% endfor %}
-	</ul>
-	{% endif %}
-      </div>
-    </div>
-  </body>
-</html>
+    {% else %}
+    No players online.
+    {% endif %}
+  </div>
+  
+  {% if offline_players %}
+  <div id="offline_players">
+    Offline Players:
+    <ul>
+      {% for player in offline_players %}
+      <li>
+	{{ player.player }} last seen at
+	<script>
+  	  document.write(moment.utc("{{ player.last_seen }}").local().format('LLLL'));
+	</script>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+  
+  {% if post %}
+  {{ post }}
+  {% endif %}
+</div>
+<div id="achievements" class="minifeed">
+  Recent Achievements:
+  {% if achievements %}
+  <ul>
+    {% for item in achievements %}
+    <li>
+      {{ item.player }} earned the achievement [{{ item.achievement }}] on
+      <script>
+  	document.write(moment.utc("{{ item.date }}").local().format('LLLL'));
+      </script>
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</div>
+{% endblock %}
