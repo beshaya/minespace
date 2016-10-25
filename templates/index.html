@@ -6,11 +6,28 @@
   var posts = {
     {% for item in posts -%}
     "{{ item.key }}": {{ item.ToJson()|tojson }},
-    {% endfor -%} };
+    {% endfor -%}
+  };
   var achievements = {
     {% for item in achievements -%}
     "{{ item.key }}": {{ item.ToJson()|tojson }},
-    {% endfor -%} };
+    {% endfor -%}
+  };
+  var online_players = {
+    {% for item in online_players -%}
+    "{{ item.key }}": {{ item.ToJson()|tojson }},
+    {% endfor -%}
+  };
+  var offline_players = {
+    {% for item in offline_players -%}
+    "{{ item.key }}": {{ item.ToJson()|tojson }},
+    {% endfor -%}
+  };
+
+  function formatDate(date) {
+    return moment.utc(date).local().format('LLLL')
+  }
+
   function postData() {
     var content = document.getElementById('post_content').value
     database.post(content, function() {
@@ -20,43 +37,91 @@
   database.on('post', function(data) {
     // This could be a new post, or a post we initially had.
     if (data.key in posts) return;
-    posts[data.key] = data.val();
+    var val = data.val()
+    posts[data.key] = val;
     var li = document.createElement('li');
-    var formatted_date = moment.utc(data.val().date).local().format('LLLL')
-    li.appendChild(document.createTextNode(data.val().player + ': ' +
-					   data.val().content));
+    li.appendChild(document.createTextNode(val.player + ': ' + val.content));
     li.appendChild(document.createElement('br'));
-    li.appendChild(document.createTextNode('posted on ' + formatted_date));
+    li.appendChild(document.createTextNode('posted on ' + formatDate(val.date)));
     var ul = document.getElementById('posts_ul');
     ul.insertBefore(li, ul.firstChild);
   });
+
+  database.on('achievemnt', function(data) {
+    if (data.key in achievements) return;
+    var val = data.val()
+    achievements[data.key] = val;
+    var li = document.createElement('li');
+    li.appendChild(document.createTextNode(val.player + ' earned the achievement ['+
+					   val.achievement + '] on ' + formatDate(val.date)));
+    var ul = document.getElementById('achievements_ul');
+    ul.insertBefore(li, ul.firstChild);
+  });
+
+  database.on('player', function(data) {
+    var val = data.val();
+    if (val.is_online) {
+      if (online_players[data.key]) return;
+      online_players[data.key] = val;
+      delete offline_players[data.key];
+      document.getElementById('online_players_header').innerHTML = 'Online Players:';
+      var li = document.createElement('li');
+      li.setAttribute('id', 'online_player_li_' + data.key);
+      li.appendChild(document.createTextNode(val.player));
+      var ul = document.getElementById('online_players_ul');
+      ul.insertBefore(li, ul.firstChild);
+      var old_li = document.getElementById('offline_player_li_' + data.key);
+      if (old_li) old_li.parentNode.removeChild(old_li);
+    } else {
+      if (offline_players[data.key] && offline_players[data.key].last_seen == val.last_seen) return;
+      offline_players[data.key] = val;
+      delete online_players[data.key];
+      if (Object.keys(online_players).length == 0) {
+	document.getElementById('online_players_header').innerHTML = 'No players online.';
+      }
+
+      // Remove existing li for this player
+      var old_li = document.getElementById('online_player_li_' + data.key);
+      if (old_li) old_li.parentNode.removeChild(old_li);
+      var old_li = document.getElementById('offline_player_li_' + data.key);
+      if (old_li) old_li.parentNode.removeChild(old_li);
+
+      var li = document.createElement('li');
+      li.setAttribute('id', 'offline_player_li_' + data.key);
+      li.appendChild(document.createTextNode(val.player + ' last seen on '
+					     + formatDate(val.last_seen)));
+      var ul = document.getElementById('offline_players_ul');
+      ul.insertBefore(li, ul.firstChild);      
+    }
+  });
+	
 </script>
 {% endblock %}
 {% block contents %}
 <br>
 <div id="players">
   <div id="online_players_div">
-    {% if online_players %}
-    Current players: <p />
+    <div id="online_players_header">
+      {% if online_players %}
+      Current players:
+      {% else %}
+      No players online.
+      {% endif %}
+    </div>
     <ul id="online_players_ul">
       {% for player in online_players %}
-      <li>
+      <li id="online_player_li_{{ player.player }}">
 	{{ player.player }}
       </li>
       {% endfor %}
-    </ul>
-    
-    {% else %}
-    No players online.
-    {% endif %}
+    </ul>   
   </div>
   
-  {% if offline_players %}
   <div id="offline_players_div">
     Offline Players:
     <ul id="offline_players_ul">
       {% for player in offline_players %}
-      <li>
+      <li id="offline_player_li_{{ player.player }}">
 	{{ player.player }} last seen at
 	<script>
   	  document.write(moment.utc("{{ player.last_seen }}").local().format('LLLL'));
@@ -65,12 +130,8 @@
       {% endfor %}
     </ul>
   </div>
-  {% endif %}
-  
-  {% if post %}
-  {{ post }}
-  {% endif %}
 </div>
+
 <div id="achievements_div" class="minifeed">
   Recent Achievements:
   {% if achievements %}

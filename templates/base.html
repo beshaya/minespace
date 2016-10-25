@@ -9,7 +9,7 @@
     <script src="https://www.gstatic.com/firebasejs/3.5.1/firebase.js"></script>
     <script src="/static/js/firebase.js"></script>
     <script>
-      database = new Minebook();
+      var database = new Minebook();
       database.on('first_login', function OnFirstLogin(user) {
 	window.location = "/initial";
       });
@@ -32,7 +32,7 @@
   </head>
   <body>
     <div class="header" id="header">
-      <a onclick="login()">Login</a>
+      <a onclick="database.login()">Login</a>
     </div>
     <div class="container">
       <h1>{% block title %}Minespace{% endblock %}</h1>

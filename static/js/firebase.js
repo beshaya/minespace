@@ -86,7 +86,20 @@ function Minebook () {
     });
     
     firebase.database().ref('posts/').on('child_added', function(data) {
-      self.performCallback('post', data)
+      self.performCallback('post', data);
+    });
+
+    firebase.database().ref('achievements/').on('child_added', function(data) {
+      self.performCallback('achievement', data);
+    });
+
+    firebase.database().ref('players/').on('child_added', function(data) {
+      self.performCallback('player', data);
+    });
+
+    firebase.database().ref('players/').on('child_changed', function(data) {
+      console.log('players changed');
+      self.performCallback('player', data);
     });
   }
 };
