@@ -12,6 +12,7 @@ function Minebook () {
   this.provider_ = new firebase.auth.GoogleAuthProvider();
   this.callbacks_ = {}
   this.user_ = null;
+  var self = this;
 
   this.on = function(event, callback) {
     this.callbacks_[event] = callback;
@@ -21,6 +22,8 @@ function Minebook () {
     var extra = [].slice.call(arguments, 1);
     if (this.callbacks_[event]) {
       this.callbacks_[event].apply(this, extra);
+    } else {
+      console.log('callback ' + event + ' does not exist');
     }
   }
 
@@ -47,7 +50,7 @@ function Minebook () {
     });
     firebase.database().ref('users/' + user.uid).set({player_name: player})
       .then(function() {
-	this.performCallback('login');
+	self.performCallback('login');
       }).catch(function(error) {
 	console.log('Error setting users/uid/player: ' + error);
       });
@@ -67,24 +70,32 @@ function Minebook () {
     });
   }
 
-  this.startListeners = function() {
+  this.startLoginListener = function() {
     var self = this;
+
     // Determine the auth state of the user.
     firebase.auth().onAuthStateChanged(function(user) {
       self.user_ = user;
       if (user) {
+	self.startListeners();
 	firebase.database().ref('/users/' + user.uid).once('value').then(function(snapshot) {
-	  if (snapshot.val().player_name) return self.performCallback('login', self.user_);
+	  if (snapshot.val() && snapshot.val().player_name) {
+	    return self.performCallback('login', self.user_);
+	  }
+	  console.log('user has no player_name')
 	  return self.performCallback('first_login', self.user_);
-}).catch(function(error) {
+	}).catch(function(error) {
 	  console.log(error.message);
-	  //return self.performCallback('first_login',user);
 	});    
       } else {
 	return self.performCallback('logout');
       }
     });
-    
+  }
+  
+  this.startListeners = function() {
+    var self = this;
+
     firebase.database().ref('posts/').on('child_added', function(data) {
       self.performCallback('post', data);
     });
@@ -98,7 +109,6 @@ function Minebook () {
     });
 
     firebase.database().ref('players/').on('child_changed', function(data) {
-      console.log('players changed');
       self.performCallback('player', data);
     });
   }

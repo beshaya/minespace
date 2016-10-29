@@ -2,7 +2,7 @@
 
 installer_version=1
 
-if [[ `cat /version.txt` == "$installer_version" ]]; then
+if [[ $(cat /version.txt) == "$installer_version" ]]; then
     echo "Latest version already installed."
 else
     echo "Installing packages"
@@ -15,8 +15,8 @@ else
     /opt/app/venv/bin/pip install -r /opt/app/requirements.txt > /dev/null&& \
     gsutil cp gs://tnfc-minespace/config.py /opt/app/ &&\
     cd / &&\
-    echo "$installer_version" > version.txt && \
+    echo "$installer_version" > /version.txt && \
     echo "Installation complete."    
-
 fi
+
 cd /opt/app && git pull && cd /

@@ -47,7 +47,7 @@
     ul.insertBefore(li, ul.firstChild);
   });
 
-  database.on('achievemnt', function(data) {
+  database.on('achievement', function(data) {
     if (data.key in achievements) return;
     var val = data.val()
     achievements[data.key] = val;

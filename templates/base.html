@@ -9,9 +9,17 @@
     <script src="https://www.gstatic.com/firebasejs/3.5.1/firebase.js"></script>
     <script src="/static/js/firebase.js"></script>
     <script>
+      function redirect(uri) {
+	if (navigator.userAgent.match(/Android/i)) { 
+	  document.location=uri;      
+	} else {
+	  window.location.replace(uri);
+	}
+      }
       var database = new Minebook();
       database.on('first_login', function OnFirstLogin(user) {
-	window.location = "/initial";
+	console.log('redirecting to initial');
+	redirect("/initial");
       });
       database.on('login', function OnLogin(user) {
 	var bar = document.getElementById("header");
@@ -23,10 +31,10 @@
 	  bar.innerHTML = '<a onclick="database.login()">Login</a>'
       });
     </script>
-      {% block scripts %}
-      {% endblock %}
+    {% block scripts %}
+    {% endblock %}
     <script>
-      database.startListeners();
+      database.startLoginListener()
     </script>
   <link rel="stylesheet" type="text/css" href="/static/style.css"/>
   </head>

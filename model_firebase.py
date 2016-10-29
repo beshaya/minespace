@@ -43,7 +43,7 @@ class Model:
     def GetAll(cls):
         global db, user
         ReauthenticateIfNecessary()
-        response = db.child(cls.__tablename__).get(user['idToken'])
+        response = db.child(cls.__tablename__).order_by_child(cls.__sortby__).get(user['idToken'])
         if not response.each():
             return []
 
